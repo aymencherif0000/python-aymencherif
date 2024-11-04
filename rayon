@@ -1,0 +1,6 @@
+pi = 3.14
+r=float(input("donezle rayon d'un cercle :"))
+périmétre=2*pi*r
+surface=pi**2
+print("le périmétre est :",périmétre)
+print("la surface est :",surface)
