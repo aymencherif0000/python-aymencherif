@@ -1,0 +1,39 @@
+EX1 :STR/STR
+EX2 :str/float/int/bool
+ex3 :Parmi les noms de variables suivants, lesquels sont illégaux en Python ?
+my_var 
+m
+101    <---
+averylongvariablename
+m101
+m 101  <---
+Del
+Del
+EX4 :Quel est le résultat de l'extrait suivant ?
+a = '1'
+b = "1"
+print(a + b)
+11
+EX5 :Quel est le résultat de l'extrait suivant ?
+a = 6
+b = 3
+a /= 2 * b
+print(a)
+1
+Exercice 1
+Quel est le résultat de l'extrait suivant ?
+print((2 ** 4), (2 * 4.), (2 * 4))
+16,8.0,8
+Exercice 2
+Quel est le résultat de l'extrait suivant ?
+print((-2 / 4), (2 / 4), (2 // 4), (-2 // 4))
+-0.5 0.5 0 -1
+Exercice 3
+Quel est le résultat de l'extrait suivant ?
+print((2 % -4), (2 % 4), (2 ** 3 ** 2))
+-2 2 512
+Exercice 4
+Quel est le résultat de l'extrait suivant ?
+x = int(input("Enter a number: ")) # The user enters 2
+print(x * "5")
+55
