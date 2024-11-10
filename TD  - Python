@@ -37,3 +37,8 @@ Quel est le résultat de l'extrait suivant ?
 x = int(input("Enter a number: ")) # The user enters 2
 print(x * "5")
 55
+Exercice 5
+Quel est le résultat attendu de l'extrait de code suivant ?
+x = input("Enter a number: ") # The user enters 2
+print(type(x)
+str
