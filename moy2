@@ -1,5 +1,5 @@
 moy=float(input("donner la moyenne :"))
-if 10<=moy12:
+if 10<=moy<12:
     print("passable")
 elif 12 <=moy<14:
     print("assez bien")
