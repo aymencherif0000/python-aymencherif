@@ -1,3 +1,19 @@
+algorithme:
+
+début
+
+pi← 3,14
+ecrire(“donner le rayon “;)
+lire(r)
+S←pi*r²
+p←2*pi*r
+ecrire(“donner la surface :”,S)
+ecrire(“donner le périmètre :”,P)
+
+fin
+
+python :
+
 pi = 3.14
 r=float(input("donezle rayon d'un cercle :"))
 périmétre=2*pi*r
