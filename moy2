@@ -1,4 +1,5 @@
 ALG:
+
 debut
 ecrire("donner la moyenne :")
 si moyenne >= 10 et moyenne <12 alors
@@ -15,14 +16,7 @@ lire("eureur")
 
 
 
-
-
-
-
-
-
-
-
+python:
 
 moy=float(input("donner la moyenne :"))
 if 10<=moy<12:
