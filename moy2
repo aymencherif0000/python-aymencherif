@@ -3,16 +3,16 @@ ALG:
 debut
 ecrire("donner la moyenne :")
 si moyenne >= 10 et moyenne <12 alors
-lire("passable")
+ecrire("passable")
 sinon si moyenne >= 12 et moyenne <14 
-lire("assez bien")
+ecrire("assez bien")
 sinon si  moyenne >= 14 et moyenne <16 
-lire("bien")
+ecrire("bien")
 sinon si moyenne >=16
-lire("tres bien")
+ecrire("tres bien")
 sinon 
-lire("eureur")
-
+ecrire("eureur")
+fin
 
 
 
