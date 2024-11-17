@@ -1,3 +1,29 @@
+ALG:
+debut
+ecrire("donner la moyenne :")
+si moyenne >= 10 et moyenne <12 alors
+lire("passable")
+sinon si moyenne >= 12 et moyenne <14 
+lire("assez bien")
+sinon si  moyenne >= 14 et moyenne <16 
+lire("bien")
+sinon si moyenne >=16
+lire("tres bien")
+sinon 
+lire("eureur")
+
+
+
+
+
+
+
+
+
+
+
+
+
 moy=float(input("donner la moyenne :"))
 if 10<=moy<12:
     print("passable")
@@ -8,4 +34,4 @@ elif 14 <=moy<16:
 elif moy>=16:
     print("trés bien")
 else :
-    print("entrez une autre moyenne")
+    print("eureur")
