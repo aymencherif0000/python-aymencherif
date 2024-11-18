@@ -5,3 +5,15 @@ a=b
 b=c
 print("la valeur de a est:",a)
 print("la valeur de b est:",b)
+
+
+
+
+
+temp=float(input("donner la température :"))
+if temp<0 :
+ print("glace")
+elif temp>=0 and temp<100:
+ print("liquide")
+else :
+ print("vapeur")
