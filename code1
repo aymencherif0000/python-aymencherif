@@ -1,42 +1,133 @@
 import tkinter
 from tkinter import *
-from tkinter import ttk
 from tkinter import font
 from tkinter import messagebox
 
+# Function to handle "Add a Product" button
+def add_product():
+    # Get the aspect ratio of the main window
+    main_window_width = wn.winfo_width()
+    main_window_height = wn.winfo_height()
+    aspect_ratio = main_window_width / main_window_height
+    
+    # Calculate new window size based on the aspect ratio
+    new_window_width = 400  # You can set this width to whatever you'd like
+    new_window_height = int(new_window_width / aspect_ratio)
+    
+    # Create a new top-level window with the same aspect ratio
+    new_window = Toplevel()
+    new_window.title("Add a Product")
+    new_window.geometry(f"{new_window_width}x{new_window_height}")
+    new_window.configure(bg="white")
+    
+    # Add a message to the new window
+    label = Label(new_window, text="This is the Add Product window!", font=("Arial", 12), bg="white")
+    label.pack(pady=50)
+    
+    # Add a button to close the new window
+    close_btn = Button(new_window, text="Close", bg="lightblue", font=("Arial", 12), command=new_window.destroy)
+    close_btn.pack()
+
+# Function to handle "Delete a Product" button
+def delete_product():
+    # Get the aspect ratio of the main window
+    main_window_width = wn.winfo_width()
+    main_window_height = wn.winfo_height()
+    aspect_ratio = main_window_width / main_window_height
+    
+    # Calculate new window size based on the aspect ratio
+    new_window_width = 400  # You can set this width to whatever you'd like
+    new_window_height = int(new_window_width / aspect_ratio)
+    
+    # Create a new top-level window with the same aspect ratio
+    new_window = Toplevel()
+    new_window.title("Delete a Product")
+    new_window.geometry(f"{new_window_width}x{new_window_height}")
+    new_window.configure(bg="white")
+    
+    # Add a message to the new window
+    label = Label(new_window, text="This is the Delete Product window!", font=("Arial", 12), bg="white")
+    label.pack(pady=50)
+    
+    # Add a button to close the new window
+    close_btn = Button(new_window, text="Close", bg="lightblue", font=("Arial", 12), command=new_window.destroy)
+    close_btn.pack()
+
+# Function to handle "View a Product" button
+def view_product():
+    # Get the aspect ratio of the main window
+    main_window_width = wn.winfo_width()
+    main_window_height = wn.winfo_height()
+    aspect_ratio = main_window_width / main_window_height
+    
+    # Calculate new window size based on the aspect ratio
+    new_window_width = 400  # You can set this width to whatever you'd like
+    new_window_height = int(new_window_width / aspect_ratio)
+    
+    # Create a new top-level window with the same aspect ratio
+    new_window = Toplevel()
+    new_window.title("View a Product")
+    new_window.geometry(f"{new_window_width}x{new_window_height}")
+    new_window.configure(bg="white")
+    
+    # Add a message to the new window
+    label = Label(new_window, text="This is the View Product window!", font=("Arial", 12), bg="white")
+    label.pack(pady=50)
+    
+    # Add a button to close the new window
+    close_btn = Button(new_window, text="Close", bg="lightblue", font=("Arial", 12), command=new_window.destroy)
+    close_btn.pack()
+
+# Function to handle "Aymen Cherif" button
+def show_creator_info():
+    # Get the aspect ratio of the main window
+    main_window_width = wn.winfo_width()
+    main_window_height = wn.winfo_height()
+    aspect_ratio = main_window_width / main_window_height
+    
+    # Calculate new window size based on the aspect ratio
+    new_window_width = 400  # You can set this width to whatever you'd like
+    new_window_height = int(new_window_width / aspect_ratio)
+    
+    # Create a new top-level window with the same aspect ratio
+    new_window = Toplevel()
+    new_window.title("Creator Information")
+    new_window.geometry(f"{new_window_width}x{new_window_height}")
+    new_window.configure(bg="white")
+    
+    # Add a message to the new window
+    label = Label(new_window, text="This system was created by Aymen Cherif.", font=("Arial", 12), bg="white")
+    label.pack(pady=50)
+    
+    # Add a button to close the new window
+    close_btn = Button(new_window, text="Close", bg="lightblue", font=("Arial", 12), command=new_window.destroy)
+    close_btn.pack()
+
+# Create main window
 wn = tkinter.Tk()
-wn.title("pythongeeks shop managment system")
+wn.title("PythonGeeks Shop Management System")
 wn.configure(bg='honeydew2')
-wn.minsize(width=500,height=500)
+wn.minsize(width=500, height=500)
 wn.geometry("700x600")
-headingFrame1 = Frame(wn,bg="snow3",bd=5)
-headingFrame1.place(relx=0.2,rely=0.1,relwidth=0.6,relheight=0.16)
-headingLabel = Label(headingFrame1,text="welcom to pythongeeks shop management system",fg='grey19',font=(('courier',15,'bold')))
-headingLabel.place(relx=0,rely=0, relwidth=1, relheight=1)
 
+# Heading Frame
+headingFrame1 = Frame(wn, bg="snow3", bd=5)
+headingFrame1.place(relx=0.2, rely=0.1, relwidth=0.6, relheight=0.16)
+headingLabel = Label(headingFrame1, text="Welcome to PythonGeeks Shop Management System", fg='grey19', font=(('courier', 15, 'bold')))
+headingLabel.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-
-btn1 = Button(wn,text="add a product",bg='light blue1',fg='black',width=20,height=2)
-btn1['font'] = font.Font( size=12)
+# Buttons
+btn1 = Button(wn, text="Add a Product", bg='light blue1', fg='black', width=20, height=2, font=("Arial", 12), command=add_product)
 btn1.place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
 
-
-btn2 = Button(wn,text="delete a product",bg='misty rose',fg='black',width=20,height=2)
-btn2['font'] = font.Font( size=12)
+btn2 = Button(wn, text="Delete a Product", bg='misty rose', fg='black', width=20, height=2, font=("Arial", 12), command=delete_product)
 btn2.place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
 
-
-btn3 = Button(wn,text="view a product",bg='old lace',fg='black',width=20,height=2)
-btn3['font'] = font.Font( size=12)
+btn3 = Button(wn, text="View a Product", bg='old lace', fg='black', width=20, height=2, font=("Arial", 12), command=view_product)
 btn3.place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
 
-btn4 = Button(wn,text="aymen cherif",bg='old lace',fg='black',width=20,height=2)
-btn4['font'] = font.Font( size=12)
+btn4 = Button(wn, text="Aymen Cherif", bg='old lace', fg='black', width=20, height=2, font=("Arial", 12), command=show_creator_info)
 btn4.place(relx=0.4, rely=0.65, relwidth=0.2, relheight=0.05)
 
-
-
-
-
-
+# Main loop
 wn.mainloop()
