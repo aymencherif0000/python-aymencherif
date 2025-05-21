@@ -1,0 +1,476 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import sqlite3
+from datetime import datetime
+
+# ==================== STYLING ====================
+BG_COLOR = "#A9A9A9"
+PRIMARY_COLOR = "#0d6efd"
+SECONDARY_COLOR = "#6c757d"
+ACCENT_COLOR = "#0dcaf0"
+ERROR_COLOR = "#dc3545"
+SUCCESS_COLOR = "#198754"
+LIGHT_COLOR = "#e9ecef"
+DARK_COLOR = "#212529"
+
+FONT_TITLE = ("Segoe UI", 20, "bold")
+FONT_HEADER = ("Segoe UI", 14, "bold")
+FONT_BODY = ("Segoe UI", 12)
+FONT_SMALL = ("Segoe UI", 10)
+
+# ==================== DATABASE SETUP ====================
+def init_db():
+    conn = sqlite3.connect('shop_database.db')
+    cursor = conn.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS products 
+                     (date TEXT, prodName TEXT PRIMARY KEY, prodPrice REAL)""")
+    cursor.execute("""CREATE TABLE IF NOT EXISTS sales 
+                     (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      custName TEXT, date TEXT, 
+                      prodName TEXT, qty INTEGER, price REAL,
+                      total REAL)""")
+    conn.commit()
+    return conn
+
+db = init_db()
+
+# ==================== MAIN WINDOW ====================
+class ShopManagementSystem:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Aymen Shop Management System")
+        self.root.configure(bg=BG_COLOR)
+        self.root.state('zoomed')  # Start maximized
+        
+        # Configure style
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        
+        # Configure styles
+        self.style.configure('TFrame', background=BG_COLOR)
+        self.style.configure('TButton', font=FONT_BODY, padding=8, relief='flat')
+        self.style.configure('TLabel', background=BG_COLOR, font=FONT_BODY)
+        self.style.configure('Header.TLabel', font=FONT_HEADER)
+        self.style.configure('Title.TLabel', font=FONT_TITLE)
+        self.style.configure('TEntry', font=FONT_BODY, padding=5)
+        self.style.configure('Treeview', font=FONT_SMALL, rowheight=25)
+        self.style.configure('Treeview.Heading', font=FONT_SMALL, background=LIGHT_COLOR)
+        self.style.map('Treeview', background=[('selected', PRIMARY_COLOR)])
+        
+        self.create_main_ui()
+        
+    def create_main_ui(self):
+        # Header Frame
+        header_frame = ttk.Frame(self.root, style='TFrame')
+        header_frame.pack(pady=30, fill=tk.X)
+        
+        ttk.Label(header_frame, text="Welcome to Aymen Shop Management System", 
+                 style='Title.TLabel', foreground=PRIMARY_COLOR).pack()
+        ttk.Label(header_frame, text="AS", 
+                 font=FONT_SMALL, foreground=SECONDARY_COLOR).pack(pady=5)
+        
+        # Button Frame
+        button_frame = ttk.Frame(self.root, style='TFrame')
+        button_frame.pack(pady=40)
+        
+        buttons = [
+            ("Add Product", self.add_product_window, PRIMARY_COLOR),
+            ("Delete Product", self.delete_product_window, SECONDARY_COLOR),
+            ("View Products", self.view_products_window, ACCENT_COLOR),
+            ("New Customer", self.new_customer_window, SUCCESS_COLOR)
+        ]
+        
+        for i, (text, command, color) in enumerate(buttons):
+            btn = tk.Button(button_frame, text=text, command=command,
+                          bg=color, fg="white", font=FONT_BODY,
+                          width=20, height=3, bd=0, highlightthickness=0,
+                          activebackground=DARK_COLOR, activeforeground="white",
+                          relief='flat', cursor='hand2')
+            btn.grid(row=i//1, column=i%1, padx=15, pady=15, ipadx=10, ipady=5)
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg=DARK_COLOR))
+            btn.bind("<Leave>", lambda e, b=btn, c=color: b.config(bg=c))
+        
+        # Status Bar
+        self.status_bar = ttk.Frame(self.root, style='TFrame')
+        self.status_bar.pack(fill=tk.X, side=tk.BOTTOM, pady=10)
+        ttk.Label(self.status_bar, text="Ready", 
+                 foreground=SECONDARY_COLOR, font=FONT_SMALL).pack(side=tk.LEFT, padx=10)
+    
+    def refresh_products(self):
+        """Get fresh product list from database"""
+        return db.execute("SELECT prodName, prodPrice FROM products").fetchall()
+    
+    def add_product_window(self):
+        add_window = tk.Toplevel(self.root)
+        add_window.title("Add New Product")
+        add_window.geometry("500x400")
+        add_window.resizable(False, False)
+        add_window.configure(bg=BG_COLOR)
+        
+        # Center the window
+        self.center_window(add_window)
+        
+        # Main Frame
+        main_frame = ttk.Frame(add_window)
+        main_frame.pack(pady=20, padx=30, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, text="Add New Product", 
+                 style='Header.TLabel', foreground=PRIMARY_COLOR).pack(pady=10)
+        
+        # Form Frame
+        form_frame = ttk.Frame(main_frame)
+        form_frame.pack(pady=20)
+        
+        # Date
+        ttk.Label(form_frame, text="Date (YYYY-MM-DD):").grid(row=0, column=0, sticky='e', pady=8)
+        date_entry = ttk.Entry(form_frame, font=FONT_BODY)
+        date_entry.insert(0, datetime.now().strftime("%Y-%m-%d"))
+        date_entry.grid(row=0, column=1, pady=8, padx=10, sticky='ew')
+        
+        # Product Name
+        ttk.Label(form_frame, text="Product Name:").grid(row=1, column=0, sticky='e', pady=8)
+        name_entry = ttk.Entry(form_frame, font=FONT_BODY)
+        name_entry.grid(row=1, column=1, pady=8, padx=10, sticky='ew')
+        
+        # Price
+        ttk.Label(form_frame, text="Price:").grid(row=2, column=0, sticky='e', pady=8)
+        price_entry = ttk.Entry(form_frame, font=FONT_BODY)
+        price_entry.grid(row=2, column=1, pady=8, padx=10, sticky='ew')
+        
+        # Button Frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(pady=20)
+        
+        def save_product():
+            try:
+                price = float(price_entry.get())
+                db.execute("INSERT INTO products VALUES (?, ?, ?)",
+                          (date_entry.get(), name_entry.get(), price))
+                db.commit()
+                messagebox.showinfo("Success", "Product added successfully!", parent=add_window)
+                add_window.destroy()
+            except sqlite3.IntegrityError:
+                messagebox.showerror("Error", "Product already exists!", parent=add_window)
+            except ValueError:
+                messagebox.showerror("Error", "Price must be a number", parent=add_window)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to add product: {str(e)}", parent=add_window)
+        
+        ttk.Button(button_frame, text="Save", command=save_product, style='TButton').pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=add_window.destroy, style='TButton').pack(side=tk.LEFT, padx=10)
+    
+    def delete_product_window(self):
+        del_window = tk.Toplevel(self.root)
+        del_window.title("Delete Product")
+        del_window.geometry("500x300")
+        del_window.resizable(False, False)
+        del_window.configure(bg=BG_COLOR)
+        self.center_window(del_window)
+        
+        main_frame = ttk.Frame(del_window)
+        main_frame.pack(pady=20, padx=30, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, text="Delete Product", 
+                 style='Header.TLabel', foreground=SECONDARY_COLOR).pack(pady=10)
+        
+        products = self.refresh_products()
+        
+        if not products:
+            ttk.Label(main_frame, text="No products available to delete").pack()
+            ttk.Button(main_frame, text="Close", command=del_window.destroy, style='TButton').pack(pady=20)
+            return
+        
+        ttk.Label(main_frame, text="Select Product to Delete:").pack(pady=10)
+        
+        selected_product = tk.StringVar()
+        selected_product.set(products[0][0])
+        
+        product_menu = ttk.Combobox(main_frame, textvariable=selected_product, 
+                                  values=[p[0] for p in products], state="readonly")
+        product_menu.pack(pady=10, padx=50, fill=tk.X)
+        
+        def confirm_delete():
+            try:
+                db.execute("DELETE FROM products WHERE prodName=?", (selected_product.get(),))
+                db.commit()
+                if db.total_changes > 0:
+                    messagebox.showinfo("Success", "Product deleted successfully!", parent=del_window)
+                del_window.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to delete: {str(e)}", parent=del_window)
+        
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(pady=20)
+        
+        ttk.Button(button_frame, text="Delete", command=confirm_delete, style='TButton').pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=del_window.destroy, style='TButton').pack(side=tk.LEFT, padx=10)
+    
+    def view_products_window(self):
+        view_window = tk.Toplevel(self.root)
+        view_window.title("View Products")
+        view_window.state('zoomed')
+        view_window.configure(bg=BG_COLOR)
+        
+        main_frame = ttk.Frame(view_window)
+        main_frame.pack(pady=20, padx=30, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, text="Product Inventory", 
+                 style='Header.TLabel', foreground=ACCENT_COLOR).pack(pady=10)
+        
+        # Treeview for products
+        tree_frame = ttk.Frame(main_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        scroll_y = ttk.Scrollbar(tree_frame)
+        scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        tree = ttk.Treeview(tree_frame, columns=("Date", "Product", "Price"), 
+                           show="headings", yscrollcommand=scroll_y.set)
+        
+        tree.heading("Date", text="Date")
+        tree.heading("Product", text="Product Name")
+        tree.heading("Price", text="Price ($)")
+        
+        tree.column("Date", width=150, anchor='center')
+        tree.column("Product", width=250, anchor='w')
+        tree.column("Price", width=150, anchor='e')
+        
+        tree.pack(fill=tk.BOTH, expand=True)
+        scroll_y.config(command=tree.yview)
+        
+        try:
+            products = db.execute("SELECT * FROM products").fetchall()
+            
+            if not products:
+                ttk.Label(main_frame, text="No products found in database.").pack()
+            else:
+                for product in products:
+                    price = float(product[2]) if isinstance(product[2], str) else product[2]
+                    tree.insert("", tk.END, values=(product[0], product[1], f"{price:.2f}"))
+        except Exception as e:
+            messagebox.showerror("Error", f"Error reading database: {str(e)}", parent=view_window)
+        
+        ttk.Button(main_frame, text="Close", command=view_window.destroy, style='TButton').pack(pady=20)
+    
+    def new_customer_window(self):
+        cust_window = tk.Toplevel(self.root)
+        cust_window.title("New Customer Sale")
+        cust_window.state('zoomed')
+        cust_window.configure(bg=BG_COLOR)
+        
+        main_frame = ttk.Frame(cust_window)
+        main_frame.pack(pady=20, padx=30, fill=tk.BOTH, expand=True)
+        
+        ttk.Label(main_frame, text="New Customer Sale", 
+                 style='Header.TLabel', foreground=SUCCESS_COLOR).pack(pady=10)
+        
+        # Customer details frame
+        details_frame = ttk.LabelFrame(main_frame, text="Customer Information", padding=10)
+        details_frame.pack(fill=tk.X, pady=10, padx=10)
+        
+        ttk.Label(details_frame, text="Date:").grid(row=0, column=0, sticky='e', pady=5)
+        date_entry = ttk.Entry(details_frame, font=FONT_BODY)
+        date_entry.insert(0, datetime.now().strftime("%Y-%m-%d"))
+        date_entry.grid(row=0, column=1, pady=5, padx=10, sticky='ew')
+        
+        ttk.Label(details_frame, text="Customer Name:").grid(row=1, column=0, sticky='e', pady=5)
+        name_entry = ttk.Entry(details_frame, font=FONT_BODY)
+        name_entry.grid(row=1, column=1, pady=5, padx=10, sticky='ew')
+        
+        # Product selection frame
+        products = self.refresh_products()
+        
+        if not products:
+            ttk.Label(main_frame, text="No products available to sell").pack()
+            ttk.Button(main_frame, text="Close", command=cust_window.destroy, style='TButton').pack(pady=20)
+            return
+        
+        selection_frame = ttk.LabelFrame(main_frame, text="Select Products", padding=10)
+        selection_frame.pack(fill=tk.BOTH, expand=True, pady=10, padx=10)
+        
+        # Treeview for product selection
+        tree_frame = ttk.Frame(selection_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        scroll_y = ttk.Scrollbar(tree_frame)
+        scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        tree = ttk.Treeview(tree_frame, columns=("Product", "Price", "Qty"), 
+                           show="headings", yscrollcommand=scroll_y.set)
+        
+        tree.heading("Product", text="Product Name")
+        tree.heading("Price", text="Price ($)")
+        tree.heading("Qty", text="Quantity")
+        
+        tree.column("Product", width=300, anchor='w')
+        tree.column("Price", width=150, anchor='e')
+        tree.column("Qty", width=100, anchor='center')
+        
+        tree.pack(fill=tk.BOTH, expand=True)
+        scroll_y.config(command=tree.yview)
+        
+        # Add products to treeview with quantity entry
+        qty_entries = {}
+        for prod_name, prod_price in products:
+            price = float(prod_price) if isinstance(prod_price, str) else prod_price
+            item_id = tree.insert("", tk.END, values=(prod_name, f"{price:.2f}", "0"))
+            qty_entries[item_id] = (prod_name, price)
+        
+        def update_qty(event):
+            item = tree.focus()
+            col = tree.identify_column(event.x)
+            
+            if col == "#3":  # Quantity column
+                tree.selection_set(item)
+                tree.focus(item)
+                
+                # Create entry widget for editing
+                x, y, width, height = tree.bbox(item, col)
+                entry = ttk.Entry(tree_frame, width=5, font=FONT_SMALL, justify='center')
+                entry.place(x=x, y=y, width=width, height=height)
+                entry.insert(0, tree.set(item, col))
+                entry.focus()
+                entry.bind("<FocusOut>", lambda e: save_qty(item, col, entry))
+                entry.bind("<Return>", lambda e: save_qty(item, col, entry))
+
+        
+        def save_qty(item, col, entry):
+            try:
+                qty = int(entry.get())
+                if qty >= 0:
+                    tree.set(item, col, str(qty))
+                else:
+                    tree.set(item, col, "0")
+                entry.destroy()
+            except ValueError:
+                tree.set(item, col, "0")
+                entry.destroy()
+        
+        tree.bind("<Button-1>", update_qty)
+        
+        def generate_bill():
+            try:
+                customer_name = name_entry.get()
+                sale_date = date_entry.get()
+                
+                if not customer_name:
+                    messagebox.showerror("Error", "Please enter customer name", parent=cust_window)
+                    return
+                
+                total_amount = 0
+                bill_details = []
+                
+                # Process each product
+                for item in tree.get_children():
+                    qty = int(tree.set(item, "Qty"))
+                    if qty > 0:
+                        prod_name = qty_entries[item][0]
+                        prod_price = qty_entries[item][1]
+                        total = qty * prod_price
+                        total_amount += total
+                        
+                        # Record sale
+                        db.execute("""INSERT INTO sales 
+                                   (custName, date, prodName, qty, price, total) 
+                                   VALUES (?, ?, ?, ?, ?, ?)""",
+                                  (customer_name, sale_date, prod_name, qty, prod_price, total))
+                        bill_details.append((prod_name, qty, prod_price, total))
+                
+                if not bill_details:
+                    messagebox.showinfo("Info", "No products selected", parent=cust_window)
+                    return
+                
+                db.commit()
+                self.show_bill(customer_name, sale_date, bill_details, total_amount)
+                cust_window.destroy()
+                
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid quantities (whole numbers)", parent=cust_window)
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to generate bill: {str(e)}", parent=cust_window)
+        
+        # Button Frame
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(pady=20)
+        
+        ttk.Button(button_frame, text="Generate Bill", command=generate_bill, style='TButton').pack(side=tk.LEFT, padx=10)
+        ttk.Button(button_frame, text="Cancel", command=cust_window.destroy, style='TButton').pack(side=tk.LEFT, padx=10)
+    
+    def show_bill(self, customer_name, sale_date, bill_details, total_amount):
+        bill_window = tk.Toplevel(self.root)
+        bill_window.title("Invoice")
+        bill_window.state('zoomed')
+        bill_window.configure(bg=BG_COLOR)
+        
+        main_frame = ttk.Frame(bill_window)
+        main_frame.pack(pady=20, padx=30, fill=tk.BOTH, expand=True)
+        
+        # Bill header
+        ttk.Label(main_frame, text="INVOICE", 
+                 style='Title.TLabel', foreground=PRIMARY_COLOR).pack(pady=10)
+        
+        info_frame = ttk.Frame(main_frame)
+        info_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(info_frame, text=f"Customer: {customer_name}", 
+                 font=FONT_HEADER).pack(side=tk.LEFT, padx=20)
+        ttk.Label(info_frame, text=f"Date: {sale_date}", 
+                 font=FONT_HEADER).pack(side=tk.RIGHT, padx=20)
+        
+        # Bill items
+        tree_frame = ttk.Frame(main_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        scroll_y = ttk.Scrollbar(tree_frame)
+        scroll_y.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        tree = ttk.Treeview(tree_frame, columns=("Product", "Qty", "Price", "Total"), 
+                           show="headings", yscrollcommand=scroll_y.set)
+        
+        tree.heading("Product", text="Product")
+        tree.heading("Qty", text="Quantity")
+        tree.heading("Price", text="Unit Price ($)")
+        tree.heading("Total", text="Total ($)")
+        
+        tree.column("Product", width=300, anchor='w')
+        tree.column("Qty", width=100, anchor='center')
+        tree.column("Price", width=150, anchor='e')
+        tree.column("Total", width=150, anchor='e')
+        
+        tree.pack(fill=tk.BOTH, expand=True)
+        scroll_y.config(command=tree.yview)
+        
+        # Add items to bill
+        for name, qty, price, total in bill_details:
+            tree.insert("", tk.END, values=(name, qty, f"{price:.2f}", f"{total:.2f}"))
+        
+        # Total
+        total_frame = ttk.Frame(main_frame)
+        total_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(total_frame, text="-"*100).pack()
+        ttk.Label(total_frame, text=f"TOTAL AMOUNT: ${total_amount:.2f}", 
+                 font=FONT_HEADER, foreground=PRIMARY_COLOR).pack(pady=10)
+        
+        # Close button
+        ttk.Button(main_frame, text="Close", command=bill_window.destroy, style='TButton').pack(pady=20)
+    
+    def center_window(self, window):
+        window.update_idletasks()
+        width = window.winfo_width()
+        height = window.winfo_height()
+        x = (window.winfo_screenwidth() // 2) - (width // 2)
+        y = (window.winfo_screenheight() // 2) - (height // 2)
+        window.geometry(f'{width}x{height}+{x}+{y}')
+
+# ==================== RUN APPLICATION ====================
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ShopManagementSystem(root)
+    
+    def on_closing():
+        db.close()
+        root.destroy()
+    
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+    root.mainloop()
