@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Employés</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/favicon-new.png">
+</head>
+<body class="light-theme">
+    <header>
+        <button class="logo-btn" onclick="window.location.href='index.html'" style="background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center;">
+            <img src="assets/Logo.png" alt="Logo Entreprise" style="height:48px;width:auto;margin-left:0;">
+        </button>
+        <div class="page-title">
+            Gestion des Employés
+        </div>
+        <div class="datetime">
+            <span id="current-datetime"></span>
+            <button id="btn-settings" class="btn violet" style="margin-left:12px;vertical-align:middle;">
+                <i class="fas fa-cog"></i> Paramètres
+            </button>
+            <button id="toggle-theme-btn" class="btn" style="margin-left:12px;vertical-align:middle;">
+                <i class="fas fa-adjust"></i> Thème
+            </button>
+            <button id="btn-signout" class="btn red" style="margin-left:12px;vertical-align:middle;">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <!-- LOGO SUPPRIMÉ -->
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Rechercher un employé...">
+        </div>
+        <div class="filters">
+            <select id="filter-poste">
+                <option value="">Poste</option>
+            </select>
+            <select id="filter-service">
+                <option value="">Service</option>
+            </select>
+            <select id="filter-departement">
+                <option value="">Département/Bureau</option>
+            </select>
+            <select id="filter-genre" name="genre">
+                <option value="">Genre</option>
+                <option value="H">Homme</option>
+                <option value="F">Femme</option>
+            </select>
+        </div>
+        <div class="actions" style="justify-content: space-between; gap: 12px; margin-top: 12px;">
+            <div>
+                <button id="btn-dashboard" class="btn blue" style="background:#3498db;color:#fff;">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button id="btn-gestion-employes" class="btn violet" style="background:#6c3fcf;color:#fff;">
+                    <i class="fas fa-users"></i> Gestion des Employés
+                </button>
+            </div>
+            <div>
+                <button id="btn-add-employee" class="btn primary admin-only" style="display:none">
+                    <i class="fas fa-plus"></i> Nouvel Employé
+                </button>
+                <button id="btn-export-csv" class="btn yellow admin-only" style="display:none">
+                    <i class="fas fa-file-export"></i> Exporter CSV
+                </button>
+                <button id="btn-export-pdf" class="btn yellow admin-only" style="display:none">
+                    <i class="fas fa-file-pdf"></i> Exporter PDF
+                </button>
+                <button id="btn-import" class="btn green admin-only" style="display:none">
+                    <i class="fas fa-file-import"></i> Import
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- LOGO SUPPRIMÉ -->
+        <div id="dashboard-section" style="display:none;padding:24px 0;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;">
+                <!-- Card 1: Total employés -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header orange">Nombre total d'employés</div>
+                    <div class="dashboard-card-body">
+                        <div style="margin-bottom:16px;text-align:center;font-size:2.5em;font-weight:bold;color:#ff5722;" id="stat-total">0</div>
+                        <!-- Graphique supprimé -->
+                    </div>
+                </div>
+                <!-- Card 2: Hommes/Femmes -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header blue">Répartition Hommes/Femmes</div>
+                    <div class="dashboard-card-body">
+                        <div style="display:flex;justify-content:center;gap:32px;margin-bottom:16px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:2em;font-weight:bold;color:#3498db;" id="stat-hommes">0</div>
+                                <div style="color:#555;">Hommes</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:2em;font-weight:bold;color:#e67e88;" id="stat-femmes">0</div>
+                                <div style="color:#555;">Femmes</div>
+                            </div>
+                        </div>
+                        <canvas id="chart-gender" height="120"></canvas>
+                    </div>
+                </div>
+                <!-- Card 3: Par service -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header orange">Par Service</div>
+                    <div class="dashboard-card-body">
+                        <div id="service-list" style="margin-bottom:16px;text-align:left;font-size:1em;color:#d84315;"></div>
+                        <canvas id="chart-service" height="120"></canvas>
+                    </div>
+                </div>
+                <!-- Card 4: Par département -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header blue">Par Département</div>
+                    <div class="dashboard-card-body">
+                        <div id="departement-list" style="margin-bottom:16px;text-align:left;font-size:1em;color:#23234c;"></div>
+                        <canvas id="chart-departement" height="120"></canvas>
+                    </div>
+                </div>
+                <!-- Card 5: Nouveaux employés ce mois -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header orange">Nouveaux employés ce mois</div>
+                    <div class="dashboard-card-body">
+                        <div style="margin-bottom:16px;text-align:center;font-size:2.2em;font-weight:bold;color:#ff9800;" id="stat-new-this-month">0</div>
+                        <div style="color:#888;font-size:0.95em;">Recrutés en juillet 2025</div>
+                    </div>
+                </div>
+                <!-- Card 6: Anniversaires à venir -->
+                <div class="dashboard-card">
+                    <div class="dashboard-card-header blue">Anniversaires à venir</div>
+                    <div class="dashboard-card-body">
+                        <ul id="upcoming-birthdays" style="list-style:none;padding:0;margin:0;width:100%;font-size:1em;color:#3498db;text-align:left;"></ul>
+                    </div>
+                </div>
+                <!-- Card 7: Statistiques simples -->
+                <!-- Carte supprimée comme demandé -->
+                <!-- Card 8: Informations détaillées -->
+                <!-- Tableau supprimé comme demandé -->
+            </div>
+        </div>
+        <div id="employees-table-container">
+            <table id="employees-table">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Service</th>
+                        <th>Téléphone portable</th>
+                        <th>Téléphone fixe</th>
+                        <th>Durée du travail</th> <!-- Colonne renommée -->
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employees-list">
+                    <!-- La liste des employés sera générée dynamiquement ici -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal pour l'ajout/modification d'employé -->
+    <div id="employee-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- LOGO SUPPRIMÉ -->
+                <h2>Ajouter un employé</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="employee-form">
+                    <div class="form-group">
+                        <label for="matricule"><i class="fas fa-id-badge"></i> Matricule*</label>
+                        <input type="text" id="matricule" name="matricule" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nom"><i class="fas fa-user"></i> Nom*</label>
+                        <input type="text" id="nom" name="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom"><i class="fas fa-user"></i> Prénom*</label>
+                        <input type="text" id="prenom" name="prenom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="photo"><i class="fas fa-image"></i> Photo</label>
+                        <input type="file" id="photo" name="photo" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label for="tel-fixe"><i class="fas fa-phone"></i> Téléphone fixe</label>
+                        <input type="tel" id="tel-fixe" name="telFixe">
+                    </div>
+                    <div class="form-group">
+                        <label for="tel-portable"><i class="fas fa-mobile-alt"></i> Téléphone portable</label>
+                        <input type="tel" id="tel-portable" name="telPortable">
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="poste"><i class="fas fa-briefcase"></i> Poste</label>
+                        <input type="text" id="poste" name="poste">
+                    </div>
+                    <div class="form-group">
+                        <label for="service"><i class="fas fa-building"></i> Service</label>
+                        <input type="text" id="service" name="service">
+                    </div>
+                    <div class="form-group">
+                        <label for="departement"><i class="fas fa-map-marker-alt"></i> Département/Bureau</label>
+                        <input type="text" id="departement" name="departement">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-recrutement"><i class="fas fa-calendar-plus"></i> Date de recrutement</label>
+                        <input type="date" id="date-recrutement" name="dateRecrutement">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-naissance"><i class="fas fa-birthday-cake"></i> Date de naissance</label>
+                        <input type="date" id="date-naissance" name="dateNaissance">
+                    </div>
+                    <div class="form-group">
+                        <label for="genre"><i class="fas fa-venus-mars"></i> Genre</label>
+                        <select id="genre" name="genre">
+                            <option value="H">Homme</option>
+                            <option value="F">Femme</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="remarques">Remarques</label>
+                        <textarea id="remarques" name="remarques"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary">Enregistrer</button>
+                        <button type="button" class="btn" onclick="closeModal()">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour les paramètres -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- LOGO SUPPRIMÉ -->
+                <h2>Paramètres</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Thème</h3>
+                    <div class="theme-toggle">
+                        <button id="theme-light" class="btn">
+                            <i class="fas fa-sun"></i> Mode Clair
+                        </button>
+                        <button id="theme-dark" class="btn">
+                            <i class="fas fa-moon"></i> Mode Sombre
+                        </button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Gestion des utilisateurs</h3>
+                    <div id="users-list">
+                        <!-- La liste des utilisateurs sera générée dynamiquement ici -->
+                    </div>
+                    <button id="add-user" class="btn primary">
+                        <i class="fas fa-user-plus"></i> Ajouter un utilisateur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal fiche employé (carte de visite) -->
+    <div id="employee-card-modal" class="modal">
+        <div class="modal-content card-modal-content">
+            <div class="modal-header">
+                <!-- LOGO SUPPRIMÉ -->
+                <h2>Fiche Employé</h2>
+                <span class="close" id="close-card-modal">&times;</span>
+            </div>
+            <div class="modal-body card-modal-body" style="display:flex;align-items:flex-start;gap:32px;">
+                <div class="card-info" style="flex:1;">
+                    <div><strong>Matricule :</strong> <span id="card-matricule"></span></div>
+                    <div><strong>Nom :</strong> <span id="card-nom"></span></div>
+                    <div><strong>Prénom :</strong> <span id="card-prenom"></span></div>
+                    <div><strong>Poste :</strong> <span id="card-poste"></span></div>
+                    <div><strong>Service :</strong> <span id="card-service"></span></div>
+                    <div><strong>Département :</strong> <span id="card-departement"></span></div>
+                    <div><strong>Téléphone fixe :</strong> <span id="card-tel-fixe"></span></div>
+                    <div><strong>Téléphone portable :</strong> <span id="card-tel-portable"></span></div>
+                    <div><strong>Email :</strong> <span id="card-email"></span></div>
+                    <div><strong>Date de recrutement :</strong> <span id="card-date-recrutement"></span></div>
+                    <div><strong>Date de naissance :</strong> <span id="card-date-naissance"></span></div>
+                    <div><strong>Genre :</strong> <span id="card-genre"></span></div>
+                    <div><strong>Remarques :</strong> <span id="card-remarques"></span></div>
+                </div>
+                <div class="card-photo" style="flex:0 0 180px;text-align:center;">
+                    <img id="card-photo-img" src="" alt="Photo employé" style="width:160px;height:200px;object-fit:cover;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/database.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.getElementById('toggle-theme-btn').addEventListener('click', function() {
+            const body = document.body;
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+            }
+        });
+        // Affiche ou cache les boutons selon la section active
+        function toggleActionButtons(show) {
+            document.getElementById('btn-add-employee').style.display = show ? 'inline-flex' : 'none';
+            document.getElementById('btn-export-csv').style.display = show ? 'inline-flex' : 'none';
+            document.getElementById('btn-export-pdf').style.display = show ? 'inline-flex' : 'none';
+            document.getElementById('btn-import').style.display = show ? 'inline-flex' : 'none';
+        }
+        // Synchronise window.employees avec db.employees si possible
+        function syncEmployeesData() {
+            let loaded = false;
+            // Try to load from localStorage first
+            const localEmployees = localStorage.getItem('employees');
+            if (localEmployees) {
+                try {
+                    const parsed = JSON.parse(localEmployees);
+                    if (Array.isArray(parsed)) {
+                        window.employees = parsed;
+                        loaded = true;
+                    }
+                } catch (e) {
+                    console.error('Erreur parsing localStorage employees:', e);
+                    window.employees = [];
+                }
+            }
+            // Only load from other sources if not loaded from localStorage
+            if (!loaded) {
+                if (window.db && window.db.employees && Array.isArray(window.db.employees) && window.db.employees.length) {
+                    window.employees = window.db.employees;
+                    loaded = true;
+                } else if (window.getEmployeesList && typeof window.getEmployeesList === 'function') {
+                    window.employees = window.getEmployeesList();
+                    loaded = true;
+                }
+                // Fallback: charger depuis employes.json si rien n'est chargé
+                if (!loaded) {
+                    window.employees = [];
+                }
+            }
+            // Always ensure it's an array
+            if (!Array.isArray(window.employees)) window.employees = [];
+        }
+        // Appeler la synchronisation dès le chargement de la page
+        window.addEventListener('DOMContentLoaded', function() {
+            syncEmployeesData();
+            refreshEmployeesTable();
+            updateDashboardStats();
+        });
+        // Dashboard button logic
+        document.getElementById('btn-dashboard').addEventListener('click', function() {
+            syncEmployeesData(); // Synchronise avant d'afficher le dashboard
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('employees-table-container').style.display = 'none';
+            document.getElementById('btn-dashboard').style.display = 'none';
+            document.getElementById('btn-gestion-employes').style.display = 'inline-flex';
+            toggleActionButtons(false); // cacher boutons sur dashboard
+            updateDashboardStats();
+        });
+        // Fonction utilitaire pour afficher la section Gestion des Employés
+        function showGestionEmployes() {
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('employees-table-container').style.display = 'block';
+            document.getElementById('btn-dashboard').style.display = 'inline-flex';
+            document.getElementById('btn-gestion-employes').style.display = 'none';
+            toggleActionButtons(true); // afficher boutons sur gestion employés
+        }
+        // Gestion des Employés button logic
+        document.getElementById('btn-gestion-employes').addEventListener('click', function() {
+            showGestionEmployes();
+        });
+        // Fonction pour mettre à jour les stats et graphiques du dashboard
+        function updateDashboardStats() {
+            let employees = window.employees || [];
+            console.log('Nombre d\'employés pour dashboard:', employees.length, employees);
+            // Fallback: récupérer depuis la table HTML si toujours vide
+            if (!employees || !employees.length) {
+                employees = [];
+                // Essayer d'extraire depuis la table principale
+                let rows = document.querySelectorAll('#employees-list tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    let genre = '';
+                    if (cells.length >= 10) {
+                        genre = cells[9].textContent.trim();
+                    } else if (row.dataset && row.dataset.genre) {
+                        genre = row.dataset.genre;
+                    }
+                    employees.push({
+                        matricule: cells[0]?.textContent.trim() || '',
+                        nom: cells[1]?.textContent.trim() || '',
+                        prenom: cells[2]?.textContent.trim() || '',
+                        email: cells[3]?.textContent.trim() || '',
+                        service: cells[4]?.textContent.trim() || '',
+                        telPortable: cells[5]?.textContent.trim() || '',
+                        telFixe: cells[6]?.textContent.trim() || '',
+                        departement: cells[7]?.textContent.trim() || '',
+                        poste: cells[8]?.textContent.trim() || '',
+                        genre: genre
+                    });
+                });
+                // Si aucune info genre trouvée, essayer la table dashboard
+                if (!genreFound) {
+                    employees = [];
+                    rows = document.querySelectorAll('#dashboard-employee-table tr'); // FIX: use correct table id
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        let genre = '';
+                        if (cells.length >= 10) {
+                            genre = cells[9].textContent.trim();
+                        }
+                        employees.push({
+                            matricule: cells[0]?.textContent.trim() || '',
+                            nom: cells[1]?.textContent.trim() || '',
+                            prenom: cells[2]?.textContent.trim() || '',
+                            email: cells[3]?.textContent.trim() || '',
+                            service: cells[4]?.textContent.trim() || '',
+                            telPortable: cells[5]?.textContent.trim() || '',
+                            telFixe: cells[6]?.textContent.trim() || '',
+                            departement: cells[7]?.textContent.trim() || '',
+                            poste: cells[8]?.textContent.trim() || '',
+                            genre: genre
+                        });
+                    });
+                }
+            }
+            // Correction : filtrer genre en insensible à la casse et espaces
+            const total = employees.length;
+            const hommes = employees.filter(e => (e.genre||'').trim().toUpperCase() === 'H').length;
+            const femmes = employees.filter(e => (e.genre||'').trim().toUpperCase() === 'F').length;
+            // Mettre à jour les stats dashboard
+            if (document.getElementById('stat-total')) document.getElementById('stat-total').textContent = total;
+            if (document.getElementById('stat-hommes')) document.getElementById('stat-hommes').textContent = hommes;
+            if (document.getElementById('stat-femmes')) document.getElementById('stat-femmes').textContent = femmes;
+            if (document.getElementById('stat-hommes-simple')) document.getElementById('stat-hommes-simple').textContent = hommes;
+            if (document.getElementById('stat-femmes-simple')) document.getElementById('stat-femmes-simple').textContent = femmes;
+            if (document.getElementById('stat-total-simple')) document.getElementById('stat-total-simple').textContent = total;
+            // Chart 1: Total
+            if (window.totalChart && document.getElementById('chart-total')) window.totalChart.destroy();
+            if (document.getElementById('chart-total')) {
+                const ctxTotal = document.getElementById('chart-total').getContext('2d');
+                window.totalChart = new Chart(ctxTotal, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Employés'],
+                        datasets: [{ data: [total], backgroundColor: ['#ff5722'] }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+            }
+            // Chart 2: Gender
+            if (window.genderChart && document.getElementById('chart-gender')) window.genderChart.destroy();
+            if (document.getElementById('chart-gender')) {
+                const ctxGender = document.getElementById('chart-gender').getContext('2d');
+                window.genderChart = new Chart(ctxGender, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Hommes', 'Femmes'],
+                        datasets: [{
+                            label: 'Répartition',
+                            data: [hommes, femmes],
+                            backgroundColor: ['#3498db', '#e67e88'],
+                            borderColor: ['#23234c', '#23234c'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, precision:0 } }
+                    }
+                });
+            }
+            // Chart 3: Service
+            if (window.serviceChart && document.getElementById('chart-service')) window.serviceChart.destroy();
+            if (document.getElementById('chart-service')) {
+                const ctxService = document.getElementById('chart-service').getContext('2d');
+                const serviceCounts = {};
+                employees.forEach(e => { if(e.service) serviceCounts[e.service]=(serviceCounts[e.service]||0)+1; });
+                window.serviceChart = new Chart(ctxService, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(serviceCounts),
+                        datasets: [{ data: Object.values(serviceCounts), backgroundColor: ['#ff5722','#ff9800','#ffc107','#e67e22','#8bc34a','#00bcd4','#9c27b0'] }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+                // Liste services
+                let serviceHtml = '';
+                Object.entries(serviceCounts).forEach(([service, count]) => {
+                    serviceHtml += `<div><b>${service}</b>: ${count}</div>`;
+                });
+                if (document.getElementById('service-list')) document.getElementById('service-list').innerHTML = serviceHtml || '<div style="color:#bbb;">Aucun service</div>';
+            }
+            // Chart 4: Département
+            if (window.departementChart && document.getElementById('chart-departement')) window.departementChart.destroy();
+            if (document.getElementById('chart-departement')) {
+                const ctxDepartement = document.getElementById('chart-departement').getContext('2d');
+                const depCounts = {};
+                employees.forEach(e => { if(e.departement) depCounts[e.departement]=(depCounts[e.departement]||0)+1; });
+                window.departementChart = new Chart(ctxDepartement, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(depCounts),
+                        datasets: [{ data: Object.values(depCounts), backgroundColor: ['#23234c','#3f51b5','#7986cb','#c5cae9','#e3e3e3','#607d8b','#00bcd4'] }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+                // Liste départements
+                let depHtml = '';
+                Object.entries(depCounts).forEach(([dep, count]) => {
+                    depHtml += `<div><b>${dep}</b>: ${count}</div>`;
+                });
+                if (document.getElementById('departement-list')) document.getElementById('departement-list').innerHTML = depHtml || '<div style="color:#bbb;">Aucun département</div>';
+            }
+            // Nouveaux employés ce mois
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+            const newThisMonth = employees.filter(e => {
+                if (!e.dateRecrutement) return false;
+                const d = new Date(e.dateRecrutement);
+                return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+            }).length;
+            if (document.getElementById('stat-new-this-month')) document.getElementById('stat-new-this-month').textContent = newThisMonth;
+            // Anniversaires à venir (dans 30 jours)
+            const upcoming = employees.filter(e => {
+                if (!e.dateNaissance) return false;
+                const now = new Date();
+                const birth = new Date(e.dateNaissance);
+                birth.setFullYear(now.getFullYear());
+                const diff = (birth - now) / (1000*60*60*24);
+                return diff >= 0 && diff <= 30;
+            });
+            const ul = document.getElementById('upcoming-birthdays');
+            if (ul) {
+                ul.innerHTML = upcoming.length ? upcoming.map(e => `<li><b>${e.nom} ${e.prenom}</b> - ${new Date(e.dateNaissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' })}</li>`).join('') : '<li style="color:#bbb;">Aucun anniversaire à venir</li>';
+            }
+            // Remplir la table détaillée
+            const tbody = document.getElementById('dashboard-employee-list');
+            if (tbody) {
+                tbody.innerHTML = '';
+                // Copier les infos depuis la table principale si possible
+                let mainRows = document.querySelectorAll('#employees-list tr');
+                if (mainRows.length > 0) {
+                    mainRows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[0]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[1]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[2]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[3]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[4]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[5]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[6]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[7]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[8]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[9]?.textContent.trim() || ''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${cells[10]?.textContent.trim() || 'Durée inconnue'}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>
+                                <button class='btn' title='Edit'><i class='fas fa-edit'></i></button>
+                                <button class='btn' title='Delete'><i class='fas fa-trash'></i></button>
+                                <button class='btn' title='Card'><i class='fas fa-id-card'></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    // Sinon, utiliser les données JS
+                    employees.forEach(e => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td style='padding:6px;border:1px solid #eee;'>${e.matricule||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.nom||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.prenom||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.email||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.service||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.telPortable||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.telFixe||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.departement||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.poste||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.genre||''}</td>
+                            <td style='padding:6px;border:1px solid #eee;'>${e.dureeTravail||'Durée inconnue'}</td>
+                            <td>
+                                <button class='btn' title='Edit'><i class='fas fa-edit'></i></button>
+                                <button class='btn' title='Delete'><i class='fas fa-trash'></i></button>
+                                <button class='btn' title='Card'><i class='fas fa-id-card'></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+        }
+        // Fonction pour rafraîchir la table des employés
+        function refreshEmployeesTable() {
+            const employees = window.employees || [];
+            const tbody = document.getElementById('employees-list');
+            tbody.innerHTML = '';
+            employees.forEach((e, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${e.matricule||''}</td>
+                    <td>${e.nom||''}</td>
+                    <td>${e.prenom||''}</td>
+                    <td>${e.email||''}</td>
+                    <td>${e.service||''}</td>
+                    <td>${e.telPortable||''}</td>
+                    <td>${e.telFixe||''}</td>
+                    <td>${e.dureeTravail||'Durée inconnue'}</td>
+                    <td>
+                        <button class='btn btn-edit' data-idx='${idx}' title='Edit'><i class='fas fa-edit'></i></button>
+                        <button class='btn btn-delete' data-idx='${idx}' title='Delete'><i class='fas fa-trash'></i></button>
+                        <button class='btn btn-card' data-idx='${idx}' title='Card'><i class='fas fa-id-card'></i></button>
+                        <button class='btn btn-email' data-idx='${idx}' title='Email'><i class='fas fa-envelope'></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Ajout des listeners pour les boutons
+            tbody.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    openEditModal(employees[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    if (confirm('Supprimer cet employé ?')) deleteEmployee(employees[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-card').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    openEmployeeCardModal(employees[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-email').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    const email = employees[idx].email || '';
+                    if (email) window.location.href = 'mailto:' + email;
+                    else alert('Aucun email disponible');
+                };
+            });
+        }
+        // Fonctions à ajouter (stubs, à compléter selon votre logique)
+        function openEditModal(emp) {
+            // Ouvre le modal d'édition et remplit les champs
+            const modal = document.getElementById('employee-modal');
+            if (!modal) return;
+            modal.style.display = 'block';
+            document.getElementById('matricule').value = emp.matricule || '';
+            document.getElementById('nom').value = emp.nom || '';
+            document.getElementById('prenom').value = emp.prenom || '';
+            document.getElementById('email').value = emp.email || '';
+            document.getElementById('service').value = emp.service || '';
+            document.getElementById('tel-portable').value = emp.telPortable || '';
+            document.getElementById('tel-fixe').value = emp.telFixe || '';
+            document.getElementById('departement').value = emp.departement || '';
+            document.getElementById('poste').value = emp.poste || '';
+            document.getElementById('date-recrutement').value = emp.dateRecrutement || '';
+            document.getElementById('date-naissance').value = emp.dateNaissance || '';
+            document.getElementById('genre').value = emp.genre || '';
+            document.getElementById('remarques').value = emp.remarques || '';
+            // Vous pouvez ajouter une variable globale pour savoir si c'est une édition
+            window.editingEmployeeMatricule = emp.matricule;
+        }
+        function deleteEmployee(emp) {
+            // Supprime l'employé de la liste
+            if (!emp || !window.employees) return;
+            window.employees = window.employees.filter(e => e.matricule !== emp.matricule);
+            localStorage.setItem('employees', JSON.stringify(window.employees));
+            refreshEmployeesTable();
+            updateDashboardStats();
+        }
+        function openEmployeeCardModal(emp) {
+            // Ouvre le modal fiche employé et affiche les infos
+            // ...votre logique ici...
+            alert('Fiche: ' + (emp.nom || ''));
+        }
+        // --- Filtres employés ---
+        function applyEmployeeFilters() {
+            const poste = document.getElementById('filter-poste').value.trim().toLowerCase();
+            const service = document.getElementById('filter-service').value.trim().toLowerCase();
+            const departement = document.getElementById('filter-departement').value.trim().toLowerCase();
+            const genre = document.getElementById('filter-genre').value;
+            let employees = window.employees || [];
+            if ((!employees || !employees.length) && window.getEmployeesList) {
+                employees = window.getEmployeesList();
+            }
+            // Filtrer
+            const filtered = employees.filter(e => {
+                let ok = true;
+                if (poste && (!e.poste || !e.poste.toLowerCase().includes(poste))) ok = false;
+                if (service && (!e.service || !e.service.toLowerCase().includes(service))) ok = false;
+                if (departement && (!e.departement || !e.departement.toLowerCase().includes(departement))) ok = false;
+                if (genre && genre !== '' && (e.genre||'').toUpperCase() !== genre.toUpperCase()) ok = false;
+                return ok;
+            });
+            // Mettre à jour la table
+            const tbody = document.getElementById('employees-list');
+            tbody.innerHTML = '';
+            filtered.forEach((e, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${e.matricule||''}</td>
+                    <td>${e.nom||''}</td>
+                    <td>${e.prenom||''}</td>
+                    <td>${e.email||''}</td>
+                    <td>${e.service||''}</td>
+                    <td>${e.telPortable||''}</td>
+                    <td>${e.telFixe||''}</td>
+                    <td>${e.dureeTravail||'Durée inconnue'}</td>
+                    <td>
+                        <button class='btn btn-edit' data-idx='${idx}' title='Edit'><i class='fas fa-edit'></i></button>
+                        <button class='btn btn-delete' data-idx='${idx}' title='Delete'><i class='fas fa-trash'></i></button>
+                        <button class='btn btn-card' data-idx='${idx}' title='Card'><i class='fas fa-id-card'></i></button>
+                        <button class='btn btn-email' data-idx='${idx}' title='Email'><i class='fas fa-envelope'></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Ajout des listeners pour les boutons
+            tbody.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    openEditModal(filtered[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    if (confirm('Supprimer cet employé ?')) deleteEmployee(filtered[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-card').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    openEmployeeCardModal(filtered[idx]);
+                };
+            });
+            tbody.querySelectorAll('.btn-email').forEach(btn => {
+                btn.onclick = function() {
+                    const idx = this.getAttribute('data-idx');
+                    const email = filtered[idx].email || '';
+                    if (email) window.location.href = 'mailto:' + email;
+                    else alert('Aucun email disponible');
+                };
+            });
+        }
+        // Ecouteurs sur les filtres
+        document.getElementById('filter-poste').addEventListener('change', applyEmployeeFilters);
+        document.getElementById('filter-service').addEventListener('change', applyEmployeeFilters);
+        document.getElementById('filter-departement').addEventListener('change', applyEmployeeFilters);
+        document.getElementById('filter-genre').addEventListener('change', applyEmployeeFilters);
+        // Initialiser les filtres
+        document.addEventListener('DOMContentLoaded', function() {
+            syncEmployeesData(); // Synchronise au chargement initial
+            // Remplir les filtres depuis les données existantes
+            let employees = window.employees || [];
+            if ((!employees || !employees.length) && window.getEmployeesList) {
+                employees = window.getEmployeesList();
+            }
+            const postes = new Set();
+            const services = new Set();
+            const departements = new Set();
+            employees.forEach(e => {
+                if (e.poste) postes.add(e.poste);
+                if (e.service) services.add(e.service);
+                if (e.departement) departements.add(e.departement);
+            });
+            // Remplir les sélecteurs
+            const fillSelect = (selectId, values, label) => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.innerHTML = `<option value="">${label||'Tous'}</option>`;
+                    values.forEach(v => {
+                        const option = document.createElement('option');
+                        option.value = v;
+                        option.textContent = v;
+                        select.appendChild(option);
+                    });
+                }
+            };
+            fillSelect('filter-poste', Array.from(postes), 'Poste');
+            fillSelect('filter-service', Array.from(services), 'Service');
+            fillSelect('filter-departement', Array.from(departements), 'Département/Bureau');
+            // Par défaut, afficher les deux boutons
+            document.getElementById('btn-dashboard').style.display = 'inline-flex';
+            document.getElementById('btn-gestion-employes').style.display = 'inline-flex';
+        });
+        // Helper to refresh table after import
+        function updateEmployeesTableAfterImport(newEmployees) {
+            if (Array.isArray(newEmployees) && newEmployees.length) {
+                // Merge with existing employees
+                let current = [];
+                try {
+                    const localEmployees = localStorage.getItem('employees');
+                    if (localEmployees) {
+                        current = JSON.parse(localEmployees);
+                    }
+                } catch (e) { /* ignore */ }
+                // Avoid duplicates by matricule
+                const all = [...current];
+                newEmployees.forEach(emp => {
+                    if (!all.some(e => e.matricule === emp.matricule)) all.push(emp);
+                });
+                window.employees = all;
+                localStorage.setItem('employees', JSON.stringify(all));
+                refreshEmployeesTable();
+                updateDashboardStats();
+                showGestionEmployes();
+            } else {
+                alert('Aucun employé importé ou format invalide.');
+            }
+        }
+        // Ajout : après import CSV ou PDF, basculer automatiquement sur Gestion des Employés
+        // Si le code d'import est dans un autre fichier JS, appelez updateEmployeesTableAfterImport(importedEmployees) après un import réussi.
+        document.getElementById('btn-import').addEventListener('click', function() {
+            // Exemple de logique d'import CSV
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.csv';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const text = evt.target.result;
+                    // Simple CSV parsing (assume first line is header)
+                    const lines = text.split(/\r?\n/).filter(l => l.trim());
+                    if (lines.length < 2) return alert('Fichier vide ou format incorrect');
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    const employees = lines.slice(1).map(line => {
+                        const values = line.split(',').map(v => v.replace(/"/g, '').trim());
+                        const obj = {};
+                        headers.forEach((h, i) => { obj[h] = values[i] || ''; });
+                        // Adapter les clés pour le tableau, remplir toutes les propriétés attendues
+                        return {
+                            matricule: obj['Matricule'] || '',
+                            nom: obj['Nom'] || '',
+                            prenom: obj['Prénom'] || '',
+                            email: obj['Email'] || '',
+                            service: obj['Service'] || '',
+                            telPortable: obj['Téléphone portable'] || '',
+                            telFixe: obj['Téléphone fixe'] || '',
+                            departement: obj['Département'] || obj['Département/Bureau'] || '',
+                            poste: obj['Poste'] || '',
+                            genre: obj['Genre'] || '',
+                            dateRecrutement: obj['Date de recrutement'] || '',
+                            dateNaissance: obj['Date de naissance'] || '',
+                            remarques: obj['Remarques'] || '',
+                            dureeTravail: obj['Durée du travail'] || ''
+                        };
+                    });
+                    updateEmployeesTableAfterImport(employees);
+                    alert('Import réussi !');
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: #f6f8fa;
+            color: #23234c;
+        }
+        body.dark-theme {
+            background: #181828;
+            color: #f4f4f4;
+        }
+        body.dark-theme header {
+            background: linear-gradient(90deg,#23234c 60%,#23234c 100%);
+            color: #fff;
+        }
+        .dashboard-card {
+            min-width: 220px;
+            max-width: 320px;
+            padding: 0 0 10px 0;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px #23234c14, 0 1.5px 6px #23234c08;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        body.dark-theme .dashboard-card {
+            background: #23234c;
+            color: #f4f4f4;
+            box-shadow: 0 4px 24px #0008, 0 1.5px 6px #0004;
+        }
+        .dashboard-card-header {
+            font-weight: 600;
+            font-size: 1em;
+            padding: 10px 0 8px 0;
+            text-align: center;
+            border-radius: 18px 18px 0 0;
+            letter-spacing: 0.5px;
+        }
+        .dashboard-card-header.orange {
+            background: linear-gradient(90deg,#ff5722 60%,#ff9800 100%);
+            color: #fff;
+        }
+        body.dark-theme .dashboard-card-header.orange {
+            background: linear-gradient(90deg,#ff9800 60%,#d84315 100%);
+            color: #fff;
+        }
+        .dashboard-card-header.blue {
+            background: linear-gradient(90deg,#23234c 60%,#3498db 100%);
+            color: #fff;
+        }
+        body.dark-theme .dashboard-card-header.blue {
+            background: linear-gradient(90deg,#23234c 60%,#3498db 100%);
+            color: #fff;
+        }
+        .dashboard-card-body {
+            padding: 10px 6px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        body.dark-theme .dashboard-card-body {
+            background: #23234c;
+            color: #f4f4f4;
+        }
+        .dashboard-card-filters {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 0 8px;
+            gap: 4px;
+        }
+        .filter-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 18px;
+            margin: 2px 0;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 0 1px 4px #23234c08;
+            transition: background 0.2s, color 0.2s;
+        }
+        .filter-btn.orange {
+            background: #ffccbc;
+            color: #d84315;
+        }
+        .filter-btn.blue {
+            background: #c5cae9;
+            color: #23234c;
+        }
+        body.dark-theme .filters select,
+        body.dark-theme .search-bar input {
+            background: #23234c;
+            color: #f4f4f4;
+            border: 1px solid #444;
+        }
+        .btn.violet, .btn.blue, .btn.primary, .btn.yellow, .btn.green {
+            /* Revert to default height and padding */
+            min-height: unset;
+            padding: 8px 18px;
+            font-size: 1em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .actions button {
+            min-height: unset;
+            padding: 8px 18px;
+            font-size: 1em;
+        }
+        .btn.violet {
+            background: linear-gradient(90deg,#6c3fcf 60%,#9b59b6 100%);
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #6c3fcf22;
+        }
+        body.dark-theme .btn {
+            background: #23234c;
+            color: #ff9800;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px #23234c22;
+        }
+        body.dark-theme .btn.violet {
+            background: linear-gradient(90deg,#6c3fcf 60%,#23234c 100%);
+            color: #fff;
+        }
+        body.dark-theme .btn.blue {
+            background: linear-gradient(90deg,#3498db 60%,#23234c 100%);
+            color: #fff;
+        }
+        body.dark-theme .btn.primary {
+            background: linear-gradient(90deg,#00b894 60%,#23234c 100%);
+            color: #fff;
+        }
+        body.dark-theme .btn.yellow {
+            background: linear-gradient(90deg,#ffc107 60%,#23234c 100%);
+            color: #fff;
+        }
+        body.dark-theme .btn.green {
+            background: linear-gradient(90deg,#43e97b 60%,#23234c 100%);
+            color: #fff;
+        }
+        .dashboard-card table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 1px 4px #23234c08;
+            overflow: hidden;
+        }
+        .dashboard-card th {
+            background: #23234c;
+            color: #fff;
+            font-weight: 500;
+            padding: 10px 8px;
+            border: none;
+            font-size: 1em;
+        }
+        body.dark-theme .dashboard-card th,
+        body.dark-theme #employees-table th {
+            background: #181828;
+            color: #ff9800;
+        }
+        .dashboard-card td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e3e3e3;
+            font-size: 1em;
+            background: #fff;
+            transition: background 0.2s;
+        }
+        body.dark-theme .dashboard-card td,
+        body.dark-theme #employees-table td {
+            background: #23234c;
+            color: #f4f4f4;
+            border-bottom: 1px solid #444;
+        }
+        #employees-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #23234c14;
+            overflow: hidden;
+        }
+        body.dark-theme #employees-table {
+            background: #23234c;
+            color: #f4f4f4;
+            box-shadow: 0 2px 12px #0008;
+        }
+        #employees-table th {
+            background: #23234c;
+            color: #fff;
+            font-weight: 500;
+            padding: 12px 10px;
+            border: none;
+            font-size: 1.05em;
+        }
+        #employees-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e3e3e3;
+            font-size: 1em;
+            background: #fff;
+            transition: background 0.2s;
+        }
+        #employees-table tr:hover td {
+            background: #eaf6ff;
+        }
+        body.dark-theme #employees-table tr:hover td {
+            background: #23234c;
+            color: #ff9800;
+        }
+        .actions button {
+            margin: 0 2px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px #23234c08;
+            transition: background 0.2s, color 0.2s;
+        }
+        .actions button:hover {
+            filter: brightness(1.08);
+            transform: scale(1.05);
+        }
+        .search-bar input {
+            border-radius: 8px;
+            border: 1px solid #c5cae9;
+            padding: 8px 16px;
+            font-size: 1.1em;
+            width: 260px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 4px #23234c08;
+        }
+        .filters select {
+            border-radius: 8px;
+            border: 1px solid #c5cae9;
+            padding: 8px 16px;
+            font-size: 1.05em;
+            margin-right: 8px;
+            box-shadow: 0 1px 4px #23234c08;
+        }
+        header {
+            background: linear-gradient(90deg,#23234c 60%,#3498db 100%);
+            color: #fff;
+            padding: 18px 0 12px 0;
+            box-shadow: 0 2px 12px #23234c22;
+            border-radius: 0 0 18px 18px;
+            margin-bottom: 18px;
+        }
+        .page-title {
+            font-size: 2.1em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-left: 24px;
+        }
+        .logo { display: none !important; }
+        .logo img { display: none !important; }
+        .logo-btn { display: flex !important; align-items: center; background: none; border: none; padding: 0; cursor: pointer; }
+        .logo-btn img { display: block !important; height: 48px; width: auto; margin-left: 0; transition: box-shadow 0.2s, transform 0.2s; }
+        .logo-btn:hover img { box-shadow: 0 2px 8px #23234c22; transform: scale(1.08); }
+        .modal-header .logo {
+            display: none;
+        }
+        .card-photo img, #card-photo-img {
+            border-radius: 0 !important;
+            border: none !important;
+            background: none !important;
+            box-shadow: none !important;
+        }
+        @media (max-width: 900px) {
+            .dashboard-card { min-width: 160px; max-width: 100%; }
+            .dashboard-card-header { font-size: 0.95em; }
+            .dashboard-card-body { padding: 6px 2px; }
+            .dashboard-card-filters { padding: 0 2px; }
+            .search-bar input, .filters select { width: 100%; font-size: 1em; }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Gestion des Employés</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+        }
+
+        .login-container {
+            background-color: var(--bg-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header img {
+            max-width: 150px;
+            margin-bottom: 1rem;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <div class="login-container">
+        <div class="login-header">
+            <img src="assets/logo.png" alt="Logo Entreprise">
+            <h1>Gestion des Employés</h1>
+        </div>
+
+        <form id="login-form" class="login-form">
+            <div class="error-message" id="error-message">
+                Identifiants incorrects
+            </div>
+
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" required>
+            </div>
+
+            <button type="submit" class="btn primary">Se connecter</button>
+        </form>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const auth = new Auth();
+            const form = document.getElementById('login-form');
+            const errorMessage = document.getElementById('error-message');
+
+            // Vérifier si l'utilisateur est déjà connecté
+            if (sessionStorage.getItem('currentUser')) {
+                window.location.href = 'index.html';
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (auth.login(username, password)) {
+                    window.location.href = 'index.html';
+                } else {
+                    errorMessage.style.display = 'block';
+                    form.reset();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
